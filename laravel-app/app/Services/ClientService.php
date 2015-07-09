@@ -4,16 +4,32 @@ namespace App\Services;
 
 
 use App\Repositories\ClientRepository;
-use Illuminate\Validation\Validator;
+use Illuminate\Validation\Factory as Validator;
 
 class ClientService {
-    private $client;
+    private $repository;
     private $validator;
 
-    public function __construct(ClientRepository $client, Validator $validator)
+    public function __construct(ClientRepository $repository, Validator $validator)
     {
-        $this->client = $client;
+        $this->repository = $repository;
         $this->validator = $validator;
+    }
+
+
+    public function validate(array $data)
+    {
+        return $this->validator->make($data, [
+            'name'=>'required|max:100',
+            'email'=>'required|email',
+            'phone'=>'required',
+            'address'=>'required'
+        ]);
+    }
+
+    public function getRepository()
+    {
+        return $this->repository;
     }
 
     public function create(array $data)
@@ -21,18 +37,9 @@ class ClientService {
         $validator = $this->validate($data);
 
         if ($validator->fails()){
-            return ['error'=>true, 'messages'=> $validator->messages()];
+            return ['error'=>true, 'messages'=> $validator->getMessageBag()];
         }
 
-        $client = $this->client->getModel()->create($data);
-        return $client;
-    }
-
-    public function validate(array $data)
-    {
-        return $this->validator->make($data, [
-            'name'=>'required|max:100',
-            'email'=>'email',
-        ]);
+        return $this->getRepository()->create($data);
     }
 }

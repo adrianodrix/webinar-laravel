@@ -2,31 +2,36 @@
 
 namespace App\Http\Controllers;
 
-use App\Repositories\ClientRepository;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Response;
 use App\Services\ClientService;
 
 class ClientController extends Controller
 {
-    private $repository;
-    /**
-     * @var ClientService
-     */
     private $service;
 
-    public function __construct(ClientRepository $repository, ClientService $service)
+    public function __construct(ClientService $service)
     {
-        $this->repository = $repository;
         $this->service = $service;
     }
 
     public function index()
     {
-        return $this->repository->findAll();
+        return $this->service->getRepository()->findAll();
+    }
+
+    public function get($id)
+    {
+        return $this->service->getRepository()->find($id);
     }
 
     public function store(Request $request){
         return Response::json($this->service->create($request->all()));
+    }
+    public function update(Request $request, $id){
+        return Response::json($this->service->getRepository()->update($request->all(), $id));
+    }
+    public function delete($id){
+        return Response::json($this->service->getRepository()->delete($id));
     }
 }
